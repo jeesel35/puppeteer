@@ -215,7 +215,11 @@ class TestPass {
       return;
     }
     this._runningUserCallbacks.set(workerId, test._userCallback);
-    const error = await test._userCallback.run(state, test);
+    let error = await test._userCallback.run(state, test);
+    if (error && test.error === TimeoutError) {
+      // Let's retry a timed out test
+      error = await test._userCallback.run(state, test);
+    }
     this._runningUserCallbacks.delete(workerId, test._userCallback);
     if (this._termination)
       return;
